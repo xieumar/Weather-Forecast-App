@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
-  useSharedValue, useAnimatedStyle,
+  useSharedValue, useAnimatedStyle, useAnimatedScrollHandler,
   withSpring, withTiming, withSequence,
   FadeInDown, ZoomIn,
 } from 'react-native-reanimated';
@@ -36,6 +36,11 @@ export default function HomeScreen() {
   const { coords, permissionStatus, loading: locLoading } = useLocation();
 
   // Animations
+  const scrollY     = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+
   const tempScale   = useSharedValue(0.6);
   const tempOpacity = useSharedValue(0);
   const pulseFn     = useSharedValue(1);
@@ -138,8 +143,10 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <ScrollView
+        <Animated.ScrollView
           showsVerticalScrollIndicator={false}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl refreshing={loading && !!current} onRefresh={onRefresh} tintColor={COLORS.accent} />
           }
@@ -192,12 +199,12 @@ export default function HomeScreen() {
           {hourly.length > 0 && <HourlyForecast hourly={hourly} />}
 
           {daily.length > 0 && (
-            <DailyForecast daily={daily} onDayPress={() => router.push('./forecast')} />
+            <DailyForecast daily={daily} scrollY={scrollY} onDayPress={() => router.push('./forecast')} />
           )}
 
-          {current && <WeatherStats current={current} />}
+          {current && <WeatherStats current={current} scrollY={scrollY} />}
           <View style={{ height: 20 }} />
-        </ScrollView>
+        </Animated.ScrollView>
       </SafeAreaView>
     </LinearGradient>
   );

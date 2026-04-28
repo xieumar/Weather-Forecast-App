@@ -1,7 +1,11 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withDelay, withSpring,
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring, 
+  withTiming, 
+  type SharedValue
 } from 'react-native-reanimated';
 import WeatherIcon from './WeatherIcon';
 import { dayLabel } from '../utils/weatherUtils';
@@ -9,21 +13,8 @@ import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import type { DailyForecastItem } from '../types/weather';
 
 function DayRow({ item, index, onPress }: { item: DailyForecastItem; index: number; onPress?: () => void }) {
-  const opacity    = useSharedValue(0);
-  const translateX = useSharedValue(-30);
-
-  useEffect(() => {
-    opacity.value    = withDelay(index * 80, withSpring(1));
-    translateX.value = withDelay(index * 80, withSpring(0, { damping: 15 }));
-  }, []);
-
-  const style = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateX: translateX.value }],
-  }));
-
   return (
-    <Animated.View style={style}>
+    <View>
       <TouchableOpacity style={styles.row} activeOpacity={0.7} onPress={onPress}>
         <Text style={styles.day}>{dayLabel(item.dt)}</Text>
         <View style={styles.middle}>
@@ -35,15 +26,48 @@ function DayRow({ item, index, onPress }: { item: DailyForecastItem; index: numb
           <Text style={styles.low}>{item.tempMin}°</Text>
         </View>
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 }
 
-interface Props { daily: DailyForecastItem[]; onDayPress?: () => void }
+interface Props { daily: DailyForecastItem[]; onDayPress?: () => void; scrollY: SharedValue<number>; }
 
-export default function DailyForecast({ daily, onDayPress }: Props) {
+export default function DailyForecast({ daily, scrollY, onDayPress }: Props) {
+  const { height } = useWindowDimensions();
+  const layoutY = useSharedValue(0);
+  const isMeasured = useSharedValue(false);
+  const hasAppeared = useSharedValue(0); // 0 = hidden, 1 = visible
+
+  const style = useAnimatedStyle(() => {
+    // Keep it hidden until we know exactly where it is on the screen
+    if (!isMeasured.value) {
+      return { opacity: 0, transform: [{ translateY: 50 }] };
+    }
+
+    // Trigger the animation when the user scrolls near it (with a 100px buffer)
+    if (scrollY.value + height > layoutY.value + 100) {
+      hasAppeared.value = 1;
+    }
+
+    return {
+      opacity: withTiming(hasAppeared.value, { duration: 500 }),
+      transform: [
+        { translateY: withSpring(hasAppeared.value ? 0 : 50, { damping: 14, stiffness: 100 }) }
+      ]
+    };
+  });
+
   return (
-    <View style={styles.container}>
+    <Animated.View 
+      style={[styles.container, style]}
+      onLayout={(e) => { 
+        // Only grab the layout once to prevent re-measurement glitches
+        if (!isMeasured.value) {
+          layoutY.value = e.nativeEvent.layout.y; 
+          isMeasured.value = true;
+        }
+      }}
+    >
       <Text style={styles.label}>7-Day Forecast</Text>
       <View style={styles.card}>
         {daily.slice(0, 7).map((item, i) => (
@@ -53,7 +77,7 @@ export default function DailyForecast({ daily, onDayPress }: Props) {
           </View>
         ))}
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

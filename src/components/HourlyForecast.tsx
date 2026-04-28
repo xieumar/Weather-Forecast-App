@@ -49,7 +49,7 @@ export default function HourlyForecast({ hourly }: { hourly: HourlyForecastItem[
 const styles = StyleSheet.create({
   container: { marginBottom: SPACING.lg },
   label:     { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: SPACING.sm, paddingHorizontal: SPACING.lg },
-  scroll:    { paddingHorizontal: SPACING.lg, gap: SPACING.sm },
+  scroll:    { paddingHorizontal: SPACING.lg, paddingVertical: 10, gap: SPACING.sm },
   item:      { alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: RADIUS.md, paddingVertical: SPACING.md, paddingHorizontal: SPACING.sm, width: 58, gap: 5, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
   itemActive:{ backgroundColor: 'rgba(77,159,255,0.18)', borderColor: 'rgba(77,159,255,0.4)' },
   time:      { color: COLORS.textMuted, fontSize: 11, fontWeight: '500' },

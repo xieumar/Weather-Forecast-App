@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
 
   header:         { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.sm, gap: SPACING.sm },
   closeBtn:       { padding: 6, marginRight: 4 },
-  headerTitle:    { color: COLORS.textPrimary, fontSize: 20, fontWeight: '700' },
+  headerTitle:    { color: COLORS.textPrimary, fontSize: 20, fontWeight: '700', marginBottom: 10 },
   headerSub:      { color: COLORS.textMuted, fontSize: 13, marginTop: 1 },
   tempBadge:      { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: RADIUS.round, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: COLORS.glassBorder },
   tempBadgeText:  { color: COLORS.textPrimary, fontSize: 16, fontWeight: '600' },
