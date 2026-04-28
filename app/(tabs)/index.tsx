@@ -85,7 +85,7 @@ export default function HomeScreen() {
   if ((loading || locLoading) && !current) {
     return (
       <LinearGradient colors={[...gradient]} style={styles.screen}>
-        <SafeAreaView style={{ flex: 1 }}><SkeletonLoader /></SafeAreaView>
+        <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}><SkeletonLoader /></SafeAreaView>
       </LinearGradient>
     );
   }
@@ -94,7 +94,7 @@ export default function HomeScreen() {
   if (error && !current) {
     return (
       <LinearGradient colors={[...gradient]} style={styles.screen}>
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
           <ErrorView
             error={error}
             onRetry={permissionStatus === 'denied'
@@ -108,7 +108,7 @@ export default function HomeScreen() {
 
   return (
     <LinearGradient colors={[...gradient]} style={styles.screen}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
         {/* Header */}
         <View style={styles.header}>
           <View>

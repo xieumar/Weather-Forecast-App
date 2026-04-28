@@ -94,7 +94,7 @@ export default function SearchScreen() {
 
   return (
     <LinearGradient colors={['#1A2E50', '#0B1426']} style={styles.screen}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
 
         {/* ── Title ──────────────────────────────────────────────────────── */}
         <Animated.View entering={FadeInDown.duration(350)} style={styles.header}>
