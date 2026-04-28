@@ -1,4 +1,4 @@
-export const OWM_API_KEY   = '5f9f3e07cb0c5de7c5958302125b9bec';
+export const OWM_API_KEY   = process.env.EXPO_PUBLIC_OWM_API_KEY as string;
 export const OWM_BASE_URL  = 'https://api.openweathermap.org/data/2.5';
 export const OWM_GEO_URL   = 'https://api.openweathermap.org/geo/1.0';
  
