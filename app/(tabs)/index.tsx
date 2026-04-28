@@ -1,98 +1,228 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useEffect, useCallback } from 'react';
+import {
+  View, Text, StyleSheet, ScrollView,
+  TouchableOpacity, RefreshControl,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withSpring, withTiming, withSequence,
+  FadeInDown, ZoomIn,
+} from 'react-native-reanimated';
+import { router } from 'expo-router';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useWeatherContext }  from '@/src/context/WeatherContext';
+import { useLocation }        from '@/src/hooks/useLocation';
+import WeatherIcon     from '@/src/components/WeatherIcon';
+import HourlyForecast  from '@/src/components/HourlyForecast';
+import DailyForecast   from '@/src/components/DailyForecast';
+import WeatherStats    from '@/src/components/WeatherStats';
+import SkeletonLoader  from '@/src/components/SkeletonLoader';
+import ErrorView       from '@/src/components/ErrorView';
+import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
+import {
+  getGradientForCondition, fullDate,
+} from '@/src/utils/weatherUtils';
+import { loadLastCity } from '@/src/services/cacheService';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const {
+    current, daily, hourly, loading, error, isOffline,
+    fetchByCoords, fetchByCity, cityName,
+  } = useWeatherContext();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const { coords, permissionStatus, loading: locLoading } = useLocation();
+
+  // Animations
+  const tempScale   = useSharedValue(0.6);
+  const tempOpacity = useSharedValue(0);
+  const pulseFn     = useSharedValue(1);
+
+  useEffect(() => {
+    if (current) {
+      tempScale.value   = withSpring(1, { damping: 12, stiffness: 120 });
+      tempOpacity.value = withTiming(1, { duration: 600 });
+    }
+  }, [current]);
+
+  useEffect(() => {
+    if (isOffline) {
+      pulseFn.value = withSequence(
+        withTiming(1.05, { duration: 600 }),
+        withTiming(0.95, { duration: 600 }),
+        withTiming(1,    { duration: 400 }),
+      );
+    }
+  }, [isOffline]);
+
+  // Fetch on location
+  useEffect(() => {
+    if (coords) {
+      fetchByCoords(coords.lat, coords.lon);
+    } else if (permissionStatus === 'denied') {
+      loadLastCity().then(city => { if (city) fetchByCity(city); });
+    }
+  }, [coords, permissionStatus]);
+
+  const onRefresh = useCallback(() => {
+    if (coords)       fetchByCoords(coords.lat, coords.lon);
+    else if (cityName) fetchByCity(cityName);
+  }, [coords, cityName]);
+
+  const tempStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: tempScale.value }],
+    opacity:    tempOpacity.value,
+  }));
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseFn.value }],
+  }));
+
+  const gradient = getGradientForCondition(current?.weather[0]?.icon);
+
+  // Loading
+  if ((loading || locLoading) && !current) {
+    return (
+      <LinearGradient colors={[...gradient]} style={styles.screen}>
+        <SafeAreaView style={{ flex: 1 }}><SkeletonLoader /></SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
+  // Fatal error
+  if (error && !current) {
+    return (
+      <LinearGradient colors={[...gradient]} style={styles.screen}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <ErrorView
+            error={error}
+            onRetry={permissionStatus === 'denied'
+              ? () => router.push('./search')
+              : onRefresh}
+          />
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
+  return (
+    <LinearGradient colors={[...gradient]} style={styles.screen}>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Animated.Text entering={FadeInDown.duration(400)} style={styles.city}>
+              {current?.name}{current?.sys?.country ? `, ${current.sys.country}` : ''}
+            </Animated.Text>
+            <Animated.Text entering={FadeInDown.delay(100).duration(400)} style={styles.date}>
+              {current ? fullDate(current.dt) : ''}
+            </Animated.Text>
+          </View>
+          <View style={styles.actions}>
+            {isOffline && <Animated.View style={[styles.offlineDot, pulseStyle]} />}
+            <TouchableOpacity style={styles.btn} onPress={() => router.push('./search')}>
+              <Ionicons name="search" size={22} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.btn} onPress={onRefresh}>
+              <Ionicons name="refresh" size={22} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Offline / error banner */}
+        {error && current && (
+          <View style={styles.banner}>
+            <Ionicons name="wifi-outline" size={13} color={COLORS.warning} />
+            <Text style={styles.bannerText}>{error.message}</Text>
+          </View>
+        )}
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={loading && !!current} onRefresh={onRefresh} tintColor={COLORS.accent} />
+          }
+        >
+          {/* Hero */}
+          <View style={styles.hero}>
+            <Animated.View entering={ZoomIn.delay(200).duration(500)}>
+              <WeatherIcon iconCode={current?.weather[0]?.icon ?? '01d'} size={100} animated />
+            </Animated.View>
+
+            <Animated.Text style={[styles.temp, tempStyle]}>
+              {Math.round(current?.main?.temp ?? 0)}°
+            </Animated.Text>
+
+            <Animated.Text entering={FadeInDown.delay(300).duration(400)} style={styles.condition}>
+              {current?.weather[0]?.description?.replace(/\b\w/g, c => c.toUpperCase()) ?? ''}
+            </Animated.Text>
+
+            {/* High / Low badges */}
+            <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.badges}>
+              <View style={styles.badge}>
+                <Ionicons name="chevron-up" size={12} color={COLORS.textMuted} />
+                <Text style={styles.badgeLabel}>High</Text>
+                <Text style={styles.badgeValue}>{Math.round(current?.main?.temp_max ?? 0)}°</Text>
+              </View>
+              <View style={styles.sep} />
+              <View style={styles.badge}>
+                <Ionicons name="chevron-down" size={12} color={COLORS.textMuted} />
+                <Text style={styles.badgeLabel}>Low</Text>
+                <Text style={styles.badgeValue}>{Math.round(current?.main?.temp_min ?? 0)}°</Text>
+              </View>
+            </Animated.View>
+          </View>
+
+          {/* Quick stats */}
+          <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.quickRow}>
+            {[
+              { icon: 'water-outline',    label: 'Humidity', val: `${current?.main?.humidity}%` },
+              { icon: 'flag-outline',     label: 'Wind',     val: `${Math.round((current?.wind?.speed ?? 0) * 3.6)} km/h` },
+              { icon: 'umbrella-outline', label: 'Rain',     val: `${current?.clouds?.all ?? 0}%` },
+            ].map(({ icon, label, val }) => (
+              <View key={label} style={styles.quickItem}>
+                <Ionicons name={icon as any} size={16} color={COLORS.accentLight} />
+                <Text style={styles.quickLabel}>{label}</Text>
+                <Text style={styles.quickVal}>{val}</Text>
+              </View>
+            ))}
+          </Animated.View>
+
+          {hourly.length > 0 && <HourlyForecast hourly={hourly} />}
+
+          {daily.length > 0 && (
+            <DailyForecast daily={daily} onDayPress={() => router.push('./forecast')} />
+          )}
+
+          {current && <WeatherStats current={current} />}
+          <View style={{ height: 20 }} />
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  screen:      { flex: 1, backgroundColor: COLORS.background },
+  header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.md },
+  city:        { color: COLORS.textPrimary, fontSize: 22, fontWeight: '700', letterSpacing: 0.2 },
+  date:        { color: COLORS.textMuted, fontSize: 13, marginTop: 2 },
+  actions:     { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  btn:         { padding: 8 },
+  offlineDot:  { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.warning, marginRight: 4 },
+  banner:      { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,209,102,0.1)', marginHorizontal: SPACING.lg, marginBottom: SPACING.sm, borderRadius: RADIUS.sm, paddingHorizontal: SPACING.md, paddingVertical: 7, borderWidth: 1, borderColor: 'rgba(255,209,102,0.2)' },
+  bannerText:  { color: COLORS.warning, fontSize: 12, flex: 1 },
+  hero:        { alignItems: 'center', paddingTop: SPACING.md, paddingBottom: SPACING.xl },
+  temp:        { color: COLORS.textPrimary, fontSize: 88, fontWeight: '200', letterSpacing: -4, marginTop: SPACING.sm, includeFontPadding: false },
+  condition:   { color: COLORS.textSecondary, fontSize: 18, fontWeight: '500', marginTop: -SPACING.sm, marginBottom: SPACING.md },
+  badges:      { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: RADIUS.round, paddingHorizontal: SPACING.lg, paddingVertical: 10, borderWidth: 1, borderColor: COLORS.glassBorder },
+  badge:       { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  badgeLabel:  { color: COLORS.textMuted, fontSize: 13 },
+  badgeValue:  { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700' },
+  sep:         { width: 1, height: 16, backgroundColor: COLORS.glassBorder, marginHorizontal: SPACING.md },
+  quickRow:    { flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: SPACING.lg, marginBottom: SPACING.xl, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.glassBorder, paddingVertical: SPACING.md },
+  quickItem:   { alignItems: 'center', gap: 4, flex: 1 },
+  quickLabel:  { color: COLORS.textMuted, fontSize: 11, fontWeight: '500' },
+  quickVal:    { color: COLORS.textPrimary, fontSize: 15, fontWeight: '700' },
 });
