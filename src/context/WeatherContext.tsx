@@ -15,6 +15,7 @@ interface WeatherContextValue {
   fetchByCoords: (lat: number, lon: number) => void;
   fetchByCity:   (city: string) => void;
   clearError:    () => void;
+  refetch:       () => Promise<any>;
 }
 
 const WeatherContext = createContext<WeatherContextValue | null>(null);

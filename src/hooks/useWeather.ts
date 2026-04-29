@@ -85,5 +85,6 @@ export function useWeather() {
     fetchByCoords,
     fetchByCity,
     clearError: () => setManualError(null),
+    refetch,
   };
 }

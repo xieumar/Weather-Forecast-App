@@ -1,15 +1,15 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, RefreshControl,
+  TouchableOpacity, RefreshControl, ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useSharedValue, useAnimatedStyle, useAnimatedScrollHandler,
-  withSpring, withTiming, withSequence,
-  FadeInDown, ZoomIn,
+  withSpring, withTiming, withSequence, Easing,
+  FadeInDown, ZoomIn, FadeIn, FadeOut
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
 
@@ -30,10 +30,12 @@ import { loadLastCity } from '@/src/services/cacheService';
 export default function HomeScreen() {
   const {
     current, daily, hourly, loading, error, isOffline,
-    fetchByCoords, fetchByCity, cityName,
+    fetchByCoords, fetchByCity, cityName, refetch,
   } = useWeatherContext();
 
   const { coords, permissionStatus, loading: locLoading } = useLocation();
+
+  const [showSplash, setShowSplash] = useState(false);
 
   // Animations
   const scrollY     = useSharedValue(0);
@@ -71,10 +73,23 @@ export default function HomeScreen() {
     }
   }, [coords, permissionStatus]);
 
+  const rotation = useSharedValue(0);
+
+  const onRefreshClick = useCallback(() => {
+    setShowSplash(true);
+    rotation.value = withTiming(rotation.value + 360, { duration: 700, easing: Easing.out(Easing.cubic) });
+    
+    Promise.all([
+      refetch(),
+      new Promise(resolve => setTimeout(resolve, 800))
+    ]).finally(() => {
+      setShowSplash(false);
+    });
+  }, [refetch]);
+
   const onRefresh = useCallback(() => {
-    if (coords)       fetchByCoords(coords.lat, coords.lon);
-    else if (cityName) fetchByCity(cityName);
-  }, [coords, cityName]);
+    refetch();
+  }, [refetch]);
 
   const tempStyle = useAnimatedStyle(() => ({
     transform: [{ scale: tempScale.value }],
@@ -82,6 +97,9 @@ export default function HomeScreen() {
   }));
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseFn.value }],
+  }));
+  const refreshStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
   const gradient = getGradientForCondition(current?.weather[0]?.icon);
@@ -126,11 +144,10 @@ export default function HomeScreen() {
           </View>
           <View style={styles.actions}>
             {isOffline && <Animated.View style={[styles.offlineDot, pulseStyle]} />}
-            <TouchableOpacity style={styles.btn} onPress={() => router.push('./search')}>
-              <Ionicons name="search" size={22} color={COLORS.textSecondary} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.btn} onPress={onRefresh}>
-              <Ionicons name="refresh" size={22} color={COLORS.textSecondary} />
+            <TouchableOpacity style={styles.btn} onPress={onRefreshClick}>
+              <Animated.View style={refreshStyle}>
+                <Ionicons name="refresh" size={22} color={COLORS.textSecondary} />
+              </Animated.View>
             </TouchableOpacity>
           </View>
         </View>
@@ -205,6 +222,22 @@ export default function HomeScreen() {
           {current && <WeatherStats current={current} scrollY={scrollY} />}
           <View style={{ height: 20 }} />
         </Animated.ScrollView>
+
+        {showSplash && (
+          <Animated.View 
+            entering={FadeIn.duration(200)} 
+            exiting={FadeOut.duration(300)} 
+            style={[StyleSheet.absoluteFill, { zIndex: 100 }]}
+          >
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(11,20,38,0.92)', justifyContent: 'center', alignItems: 'center' }]}>
+              <WeatherIcon iconCode={current?.weather[0]?.icon ?? '02d'} size={100} animated />
+              <Text style={{ color: COLORS.textPrimary, fontSize: 18, fontWeight: '600', marginTop: SPACING.xl, marginBottom: SPACING.md }}>
+                Updating Forecast...
+              </Text>
+              <ActivityIndicator size="small" color={COLORS.accent} />
+            </View>
+          </Animated.View>
+        )}
       </SafeAreaView>
     </LinearGradient>
   );
