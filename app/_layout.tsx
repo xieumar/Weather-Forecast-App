@@ -6,7 +6,7 @@ import { QueryProvider } from '@/src/context/QueryProvider';
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#0B1426' }}>
       <QueryProvider>
         <WeatherProvider>
           <StatusBar style="light" backgroundColor="transparent" translucent />
