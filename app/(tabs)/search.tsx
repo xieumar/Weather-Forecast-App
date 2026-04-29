@@ -85,7 +85,11 @@ export default function SearchScreen() {
   const selectCity = useCallback(async (name: string) => {
     Keyboard.dismiss();
     setQuery(name);
-    setResults([]);
+    
+    // Silently fetch and populate the alternatives for this exact city 
+    // so they are immediately visible if the user navigates back to this tab.
+    geocodeCity(name).then(geo => setResults(geo)).catch(() => {});
+
     await fetchByCity(name);
     router.navigate('/');
   }, [fetchByCity]);
