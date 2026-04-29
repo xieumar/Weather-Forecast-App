@@ -100,5 +100,7 @@ export function parseHourlyForecast(list: ForecastItem[]): HourlyForecastItem[] 
     icon:        item.weather[0].icon,
     pop:         item.pop,
     description: capitalize(item.weather[0].description),
+    windSpeed:   item.wind.speed,
+    humidity:    item.main.humidity,
   }));
 }

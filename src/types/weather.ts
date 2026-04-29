@@ -70,6 +70,8 @@ export interface HourlyForecastItem {
   icon: string;
   pop: number;
   description: string;
+  windSpeed: number;
+  humidity: number;
 }
 
 export type ErrorType =
