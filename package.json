@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "electron:start": "wait-on http://localhost:8081 && electron ./electron/main.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -49,9 +50,12 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "electron": "^41.5.0",
+    "electron-is-dev": "^3.0.1",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "wait-on": "^9.0.5"
   },
   "private": true
 }
