@@ -17,7 +17,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.zainabui.weatherforecastapp"
     },
     "plugins": [
       "expo-router",
@@ -35,6 +36,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e7f368e4-389e-4073-857b-fdb7cba90f43"
+      }
     }
   }
 }

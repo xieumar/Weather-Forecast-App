@@ -1,31 +1,43 @@
-import React, { useEffect, useCallback, useState } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, RefreshControl, ActivityIndicator
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, {
-  useSharedValue, useAnimatedStyle, useAnimatedScrollHandler,
-  withSpring, withTiming, withSequence, Easing,
-  FadeInDown, ZoomIn, FadeIn, FadeOut
-} from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-
-import { useWeatherContext }  from '@/src/context/WeatherContext';
-import { useLocation }        from '@/src/hooks/useLocation';
-import WeatherIcon     from '@/src/components/WeatherIcon';
-import HourlyForecast  from '@/src/components/HourlyForecast';
-import DailyForecast   from '@/src/components/DailyForecast';
-import WeatherStats    from '@/src/components/WeatherStats';
-import SkeletonLoader  from '@/src/components/SkeletonLoader';
-import ErrorView       from '@/src/components/ErrorView';
-import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  getGradientForCondition, fullDate,
-} from '@/src/utils/weatherUtils';
+  ActivityIndicator,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring, withTiming,
+  ZoomIn
+} from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import DailyForecast from '@/src/components/DailyForecast';
+import ErrorView from '@/src/components/ErrorView';
+import HourlyForecast from '@/src/components/HourlyForecast';
+import SkeletonLoader from '@/src/components/SkeletonLoader';
+import WeatherIcon from '@/src/components/WeatherIcon';
+import WeatherStats from '@/src/components/WeatherStats';
+import { COLORS, RADIUS, SPACING } from '@/src/constants/theme';
+import { useWeatherContext } from '@/src/context/WeatherContext';
+import { useLocation } from '@/src/hooks/useLocation';
 import { loadLastCity } from '@/src/services/cacheService';
+import {
+  fullDate,
+  getGradientForCondition,
+} from '@/src/utils/weatherUtils';
 
 export default function HomeScreen() {
   const {
@@ -38,18 +50,18 @@ export default function HomeScreen() {
   const [showSplash, setShowSplash] = useState(false);
 
   // Animations
-  const scrollY     = useSharedValue(0);
+  const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
   });
 
-  const tempScale   = useSharedValue(0.6);
+  const tempScale = useSharedValue(0.6);
   const tempOpacity = useSharedValue(0);
-  const pulseFn     = useSharedValue(1);
+  const pulseFn = useSharedValue(1);
 
   useEffect(() => {
     if (current) {
-      tempScale.value   = withSpring(1, { damping: 12, stiffness: 120 });
+      tempScale.value = withSpring(1, { damping: 12, stiffness: 120 });
       tempOpacity.value = withTiming(1, { duration: 600 });
     }
   }, [current]);
@@ -59,7 +71,7 @@ export default function HomeScreen() {
       pulseFn.value = withSequence(
         withTiming(1.05, { duration: 600 }),
         withTiming(0.95, { duration: 600 }),
-        withTiming(1,    { duration: 400 }),
+        withTiming(1, { duration: 400 }),
       );
     }
   }, [isOffline]);
@@ -78,7 +90,7 @@ export default function HomeScreen() {
   const onRefreshClick = useCallback(() => {
     setShowSplash(true);
     rotation.value = withTiming(rotation.value + 360, { duration: 700, easing: Easing.out(Easing.cubic) });
-    
+
     Promise.all([
       refetch(),
       new Promise(resolve => setTimeout(resolve, 800))
@@ -93,7 +105,7 @@ export default function HomeScreen() {
 
   const tempStyle = useAnimatedStyle(() => ({
     transform: [{ scale: tempScale.value }],
-    opacity:    tempOpacity.value,
+    opacity: tempOpacity.value,
   }));
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseFn.value }],
@@ -201,9 +213,9 @@ export default function HomeScreen() {
           {/* Quick stats */}
           <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.quickRow}>
             {[
-              { icon: 'water-outline',    label: 'Humidity', val: `${current?.main?.humidity}%` },
-              { icon: 'flag-outline',     label: 'Wind',     val: `${Math.round((current?.wind?.speed ?? 0) * 3.6)} km/h` },
-              { icon: 'umbrella-outline', label: 'Rain',     val: `${current?.clouds?.all ?? 0}%` },
+              { icon: 'water-outline', label: 'Humidity', val: `${current?.main?.humidity}%` },
+              { icon: 'flag-outline', label: 'Wind', val: `${Math.round((current?.wind?.speed ?? 0) * 3.6)} km/h` },
+              { icon: 'umbrella-outline', label: 'Rain', val: `${current?.clouds?.all ?? 0}%` },
             ].map(({ icon, label, val }) => (
               <View key={label} style={styles.quickItem}>
                 <Ionicons name={icon as any} size={16} color={COLORS.accentLight} />
@@ -224,9 +236,9 @@ export default function HomeScreen() {
         </Animated.ScrollView>
 
         {showSplash && (
-          <Animated.View 
-            entering={FadeIn.duration(200)} 
-            exiting={FadeOut.duration(300)} 
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(300)}
             style={[StyleSheet.absoluteFill, { zIndex: 100 }]}
           >
             <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(11,20,38,0.92)', justifyContent: 'center', alignItems: 'center' }]}>
@@ -244,25 +256,25 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen:      { flex: 1, backgroundColor: COLORS.background },
-  header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.md },
-  city:        { color: COLORS.textPrimary, fontSize: 22, fontWeight: '700', letterSpacing: 0.2 },
-  date:        { color: COLORS.textMuted, fontSize: 13, marginTop: 2 },
-  actions:     { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  btn:         { padding: 8 },
-  offlineDot:  { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.warning, marginRight: 4 },
-  banner:      { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,209,102,0.1)', marginHorizontal: SPACING.lg, marginBottom: SPACING.sm, borderRadius: RADIUS.sm, paddingHorizontal: SPACING.md, paddingVertical: 7, borderWidth: 1, borderColor: 'rgba(255,209,102,0.2)' },
-  bannerText:  { color: COLORS.warning, fontSize: 12, flex: 1 },
-  hero:        { alignItems: 'center', paddingTop: SPACING.md, paddingBottom: SPACING.xl },
-  temp:        { color: COLORS.textPrimary, fontSize: 88, fontWeight: '200', letterSpacing: -4, marginTop: SPACING.sm, includeFontPadding: false },
-  condition:   { color: COLORS.textSecondary, fontSize: 18, fontWeight: '500', marginTop: -SPACING.sm, marginBottom: SPACING.md },
-  badges:      { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: RADIUS.round, paddingHorizontal: SPACING.lg, paddingVertical: 10, borderWidth: 1, borderColor: COLORS.glassBorder },
-  badge:       { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  badgeLabel:  { color: COLORS.textMuted, fontSize: 13 },
-  badgeValue:  { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700' },
-  sep:         { width: 1, height: 16, backgroundColor: COLORS.glassBorder, marginHorizontal: SPACING.md },
-  quickRow:    { flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: SPACING.lg, marginBottom: SPACING.xl, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.glassBorder, paddingVertical: SPACING.md },
-  quickItem:   { alignItems: 'center', gap: 4, flex: 1 },
-  quickLabel:  { color: COLORS.textMuted, fontSize: 11, fontWeight: '500' },
-  quickVal:    { color: COLORS.textPrimary, fontSize: 15, fontWeight: '700' },
+  screen: { flex: 1, backgroundColor: COLORS.background },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.md },
+  city: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '700', letterSpacing: 0.2 },
+  date: { color: COLORS.textMuted, fontSize: 13, marginTop: 2 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  btn: { padding: 8 },
+  offlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.warning, marginRight: 4 },
+  banner: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,209,102,0.1)', marginHorizontal: SPACING.lg, marginBottom: SPACING.sm, borderRadius: RADIUS.sm, paddingHorizontal: SPACING.md, paddingVertical: 7, borderWidth: 1, borderColor: 'rgba(255,209,102,0.2)' },
+  bannerText: { color: COLORS.warning, fontSize: 12, flex: 1 },
+  hero: { alignItems: 'center', paddingTop: SPACING.md, paddingBottom: SPACING.xl },
+  temp: { color: COLORS.textPrimary, fontSize: 88, fontWeight: '200', letterSpacing: -4, marginTop: SPACING.sm, includeFontPadding: false },
+  condition: { color: COLORS.textSecondary, fontSize: 18, fontWeight: '500', marginTop: -SPACING.sm, marginBottom: SPACING.md },
+  badges: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: RADIUS.round, paddingHorizontal: SPACING.lg, paddingVertical: 10, borderWidth: 1, borderColor: COLORS.glassBorder },
+  badge: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  badgeLabel: { color: COLORS.textMuted, fontSize: 13 },
+  badgeValue: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700' },
+  sep: { width: 1, height: 16, backgroundColor: COLORS.glassBorder, marginHorizontal: SPACING.md },
+  quickRow: { flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: SPACING.lg, marginBottom: SPACING.xl, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.glassBorder, paddingVertical: SPACING.md },
+  quickItem: { alignItems: 'center', gap: 4, flex: 1 },
+  quickLabel: { color: COLORS.textMuted, fontSize: 11, fontWeight: '500' },
+  quickVal: { color: COLORS.textPrimary, fontSize: 15, fontWeight: '700' },
 });
