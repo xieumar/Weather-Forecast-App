@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   subtitle:        { color: COLORS.textMuted, fontSize: 14, marginTop: 3 },
 
   inputWrap:       { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)', marginHorizontal: SPACING.lg, borderRadius: RADIUS.round, paddingHorizontal: SPACING.md, paddingVertical: 13, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', marginBottom: SPACING.sm },
-  input:           { flex: 1, color: COLORS.textPrimary, fontSize: 15, padding: 0 },
+  input:           { flex: 1, color: COLORS.textPrimary, fontSize: 15, padding: 0, ...(Platform.OS === 'web' && { outlineStyle: 'none' } as any) },
 
   inlineError:     { flexDirection: 'row', alignItems: 'center', gap: 5, marginHorizontal: SPACING.lg, marginBottom: SPACING.sm },
   inlineErrorText: { color: COLORS.danger, fontSize: 12 },

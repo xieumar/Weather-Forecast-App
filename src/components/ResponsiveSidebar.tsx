@@ -51,7 +51,7 @@ export function ResponsiveSidebar() {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>v1.0.0 Stage 4</Text>
+        <Text style={styles.footerText}>v1.0.0</Text>
       </View>
     </Animated.View>
   );
