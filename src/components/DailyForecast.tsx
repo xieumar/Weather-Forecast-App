@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue, 
   useAnimatedStyle, 
@@ -12,21 +12,26 @@ import { dayLabel } from '../utils/weatherUtils';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import type { DailyForecastItem } from '../types/weather';
 
+
 function DayRow({ item, index, onPress }: { item: DailyForecastItem; index: number; onPress?: () => void }) {
   return (
-    <View>
-      <TouchableOpacity style={styles.row} activeOpacity={0.7} onPress={onPress}>
-        <Text style={styles.day}>{dayLabel(item.dt)}</Text>
-        <View style={styles.middle}>
-          <WeatherIcon iconCode={item.icon} size={22} animated={false} />
-          <Text style={styles.desc} numberOfLines={1}>{item.description}</Text>
-        </View>
-        <View style={styles.temps}>
-          <Text style={styles.high}>{item.tempMax}°</Text>
-          <Text style={styles.low}>{item.tempMin}°</Text>
-        </View>
-      </TouchableOpacity>
-    </View>
+    <Pressable 
+      style={({ hovered }: any) => [
+        styles.row,
+        hovered && { backgroundColor: 'rgba(255,255,255,0.05)', transform: [{ scale: 1.01 }] }
+      ]} 
+      onPress={onPress}
+    >
+      <Text style={styles.day}>{dayLabel(item.dt)}</Text>
+      <View style={styles.middle}>
+        <WeatherIcon iconCode={item.icon} size={22} animated={false} />
+        <Text style={styles.desc} numberOfLines={1}>{item.description}</Text>
+      </View>
+      <View style={styles.temps}>
+        <Text style={styles.high}>{item.tempMax}°</Text>
+        <Text style={styles.low}>{item.tempMin}°</Text>
+      </View>
+    </Pressable>
   );
 }
 
