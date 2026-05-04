@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, Keyboard, ActivityIndicator,
+  View, Text, TextInput, Pressable, Platform,
+  StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,6 +18,7 @@ import ErrorView             from '@/src/components/ErrorView';
 import { geocodeCity }       from '@/src/services/weatherApi';
 import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
 import type { GeoResult } from '@/src/types/weather';
+import { useKeyboardShortcuts } from '@/src/hooks/useKeyboardShortcuts';
 
 const POPULAR = ['London', 'New York', 'Tokyo', 'Paris', 'Dubai', 'Sydney', 'Lagos', 'Cairo'];
 
@@ -27,7 +28,13 @@ function CityResult({
 }: { item: GeoResult; index: number; onPress: () => void }) {
   return (
     <Animated.View entering={FadeInRight.delay(index * 55).duration(280)}>
-      <TouchableOpacity style={styles.resultRow} onPress={onPress} activeOpacity={0.7}>
+      <Pressable 
+        style={({ hovered }: any) => [
+          styles.resultRow,
+          hovered && { backgroundColor: 'rgba(255,255,255,0.1)' }
+        ]} 
+        onPress={onPress}
+      >
         <View style={styles.resultIcon}>
           <Ionicons name="location" size={17} color={COLORS.accent} />
         </View>
@@ -38,12 +45,13 @@ function CityResult({
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={15} color={COLORS.textMuted} />
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 }
 
 export default function SearchScreen() {
+  useKeyboardShortcuts();
   const { fetchByCity, loading, current, cityName } = useWeatherContext();
 
   const [query,       setQuery]       = useState('');
@@ -159,14 +167,16 @@ export default function SearchScreen() {
             <View style={styles.chips}>
               {POPULAR.map((city, i) => (
                 <Animated.View key={city} entering={FadeInRight.delay(i * 45).duration(280)}>
-                  <TouchableOpacity
-                    style={styles.chip}
+                  <Pressable
+                    style={({ hovered }: any) => [
+                      styles.chip,
+                      hovered && { transform: [{ scale: 1.05 }], backgroundColor: 'rgba(255,255,255,0.12)' }
+                    ]}
                     onPress={() => selectCity(city)}
-                    activeOpacity={0.7}
                   >
                     <Ionicons name="location-outline" size={13} color={COLORS.accent} />
                     <Text style={styles.chipText}>{city}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </Animated.View>
               ))}
             </View>
