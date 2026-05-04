@@ -38,8 +38,12 @@ import {
   fullDate,
   getGradientForCondition,
 } from '@/src/utils/weatherUtils';
+import { Platform, Pressable } from 'react-native';
+import { useKeyboardShortcuts } from '@/src/hooks/useKeyboardShortcuts';
+import { ContextMenu } from '@/src/components/ContextMenu';
 
 export default function HomeScreen() {
+  useKeyboardShortcuts();
   const {
     current, daily, hourly, loading, error, isOffline,
     fetchByCoords, fetchByCity, cityName, refetch,
@@ -142,7 +146,19 @@ export default function HomeScreen() {
   }
 
   return (
-    <LinearGradient colors={[...gradient]} style={styles.screen}>
+    <ContextMenu
+      options={[
+        { label: 'Refresh Weather', icon: 'refresh', onPress: onRefreshClick },
+        { label: 'Copy Summary',    icon: 'copy-outline', onPress: () => {
+          if (current) {
+            const summary = `${current.name}: ${Math.round(current.main.temp)}°, ${current.weather[0].description}`;
+            if (Platform.OS === 'web') navigator.clipboard.writeText(summary);
+          }
+        }},
+        { label: 'Search City',     icon: 'search',  onPress: () => router.push('/search') },
+      ]}
+    >
+      <LinearGradient colors={[...gradient]} style={styles.screen}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
         {/* Header */}
         <View style={styles.header}>
@@ -252,6 +268,7 @@ export default function HomeScreen() {
         )}
       </SafeAreaView>
     </LinearGradient>
+    </ContextMenu>
   );
 }
 
