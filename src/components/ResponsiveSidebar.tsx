@@ -29,10 +29,11 @@ export function ResponsiveSidebar() {
             <Animated.View key={item.name} entering={FadeInLeft.delay(300 + (index * 100)).duration(400)}>
               <Pressable
                 onPress={() => router.push(item.route as any)}
-                style={({ hovered }: any) => [
+                style={({ hovered, focused }: any) => [
                   styles.navItem,
                   isActive && styles.navItemActive,
                   hovered && styles.navItemHover,
+                  focused && styles.navItemFocused,
                 ]}
               >
                 <Ionicons
@@ -92,6 +93,10 @@ const styles = StyleSheet.create({
   },
   navItemActive: {
     backgroundColor: 'rgba(56, 189, 248, 0.1)',
+  },
+  navItemFocused: {
+    borderWidth: 1.5,
+    borderColor: COLORS.accent,
   },
   navText: {
     color: COLORS.textMuted,
