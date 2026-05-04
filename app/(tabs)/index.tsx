@@ -226,18 +226,20 @@ export default function HomeScreen() {
             </Animated.View>
           </View>
 
-          {/* Quick stats */}
           <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.quickRow}>
             {[
-              { icon: 'water-outline', label: 'Humidity', val: `${current?.main?.humidity}%` },
-              { icon: 'flag-outline', label: 'Wind', val: `${Math.round((current?.wind?.speed ?? 0) * 3.6)} km/h` },
-              { icon: 'umbrella-outline', label: 'Rain', val: `${current?.clouds?.all ?? 0}%` },
+              { icon: 'water-outline',    label: 'Humidity', val: `${current?.main?.humidity}%` },
+              { icon: 'flag-outline',     label: 'Wind',     val: `${Math.round((current?.wind?.speed ?? 0) * 3.6)} km/h` },
+              { icon: 'umbrella-outline', label: 'Rain',     val: `${current?.clouds?.all ?? 0}%` },
             ].map(({ icon, label, val }) => (
-              <View key={label} style={styles.quickItem}>
+              <Pressable key={label} style={({ hovered }: any) => [
+                styles.quickItem,
+                hovered && { transform: [{ scale: 1.05 }], backgroundColor: 'rgba(255,255,255,0.05)' }
+              ]}>
                 <Ionicons name={icon as any} size={16} color={COLORS.accentLight} />
                 <Text style={styles.quickLabel}>{label}</Text>
                 <Text style={styles.quickVal}>{val}</Text>
-              </View>
+              </Pressable>
             ))}
           </Animated.View>
 
