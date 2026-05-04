@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 import { COLORS } from '../constants/theme';
 
+import Animated, { FadeInLeft, FadeInDown } from 'react-native-reanimated';
+
 const NAV_ITEMS = [
   { name: 'Home',   icon: 'home',   route: '/' },
   { name: 'Search', icon: 'search', route: '/search' },
@@ -14,34 +16,35 @@ export function ResponsiveSidebar() {
   const pathname = usePathname();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <Animated.View entering={FadeInLeft.duration(600)} style={styles.container}>
+      <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.header}>
         <Ionicons name="cloud-outline" size={32} color={COLORS.accent} />
         <Text style={styles.title}>Weather</Text>
-      </View>
+      </Animated.View>
 
       <View style={styles.nav}>
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item, index) => {
           const isActive = pathname === item.route || (item.route === '/' && pathname === '/index');
           return (
-            <Pressable
-              key={item.name}
-              onPress={() => router.push(item.route as any)}
-              style={({ hovered }: any) => [
-                styles.navItem,
-                isActive && styles.navItemActive,
-                hovered && styles.navItemHover,
-              ]}
-            >
-              <Ionicons
-                name={isActive ? (item.icon as any) : (`${item.icon}-outline` as any)}
-                size={24}
-                color={isActive ? COLORS.accent : COLORS.textMuted}
-              />
-              <Text style={[styles.navText, isActive && styles.navTextActive]}>
-                {item.name}
-              </Text>
-            </Pressable>
+            <Animated.View key={item.name} entering={FadeInLeft.delay(300 + (index * 100)).duration(400)}>
+              <Pressable
+                onPress={() => router.push(item.route as any)}
+                style={({ hovered }: any) => [
+                  styles.navItem,
+                  isActive && styles.navItemActive,
+                  hovered && styles.navItemHover,
+                ]}
+              >
+                <Ionicons
+                  name={isActive ? (item.icon as any) : (`${item.icon}-outline` as any)}
+                  size={24}
+                  color={isActive ? COLORS.accent : COLORS.textMuted}
+                />
+                <Text style={[styles.navText, isActive && styles.navTextActive]}>
+                  {item.name}
+                </Text>
+              </Pressable>
+            </Animated.View>
           );
         })}
       </View>
@@ -49,7 +52,7 @@ export function ResponsiveSidebar() {
       <View style={styles.footer}>
         <Text style={styles.footerText}>v1.0.0 Stage 4</Text>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
