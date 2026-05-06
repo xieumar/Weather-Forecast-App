@@ -1,59 +1,63 @@
-# Weather Forecast App
+# Weather Forecast App: Cross-Platform Edition
 
-A premium, highly animated weather forecasting application built with React Native and Expo. This app provides users with real-time weather information, detailed multi-day forecasts, and a seamless offline experience.
+A premium, highly animated weather forecasting application built with a unified codebase for Mobile, Web, and Desktop. This app provides real-time weather data, detailed multi-day forecasts, and a seamless offline experience across all platforms.
 
-## App Features and Functionality
+---
 
-- **Current Weather Display**: View real-time temperature, comprehensive weather conditions (sunny, rainy, cloudy, etc.), humidity, wind speed, and high/low ranges alongside dynamically mapped weather icons.
-- **Location-Based Weather**: Automatically fetches weather for your current physical location using device GPS.
-- **Manual City Search**: Includes a robust autocomplete search interface allowing users to find weather for any city worldwide.
-- **Forecast View**: Displays a comprehensive multi-day forecast (5 days) and an interactive horizontal hourly forecast.
-- **Offline Caching**: Seamless offline support. If you open the app without an internet connection, it restores your last viewed data from a local SQLite database.
-- **Robust Error Handling**: Handles location permission denials, network failures, API rate limits, and invalid queries with friendly, actionable error UI and retry mechanisms.
-- **Loading States**: Keeps the user engaged with beautiful skeleton loaders and activity indicators during data fetching.
+## Live Deployments
 
-## APIs Used
+| Platform | Deployment Link |
+| :--- | :--- |
+| Web (Vercel) | [View Live Web App]([https://weather-forecast-app14.vercel.app/]) |
+| Desktop (Windows) | [Download .exe from Google Drive]([https://drive.google.com/file/d/1XWHRlIAoMopfrkcnsL8k8vKpHa995vkg/view?usp=sharing]) |
+| Mobile | *Build available via Expo/EAS* |
 
-- [OpenWeatherMap - Current Weather Data](https://openweathermap.org/current)
-- [OpenWeatherMap - 5 Day / 3 Hour Forecast](https://openweathermap.org/forecast5)
-- [OpenWeatherMap - Geocoding API](https://openweathermap.org/api/geocoding-api)
+---
 
-## Animation Highlights
+## One Codebase, Everywhere
+This project demonstrates the power of a unified JavaScript/TypeScript stack to target multiple platforms with high performance:
 
-Animations are a core part of this app, designed to create a responsive, professional, and delightful user experience:
+- **Mobile (iOS/Android):** Built with React Native & Expo for a fully native feel.
+- **Web:** Exported via Vite and optimized for hosting on Vercel with custom SPA routing.
+- **Desktop:** Packaged with Electron, featuring robust path resolution and ASAR unpacking to serve high-performance web assets locally.
 
-- **Screen Transitions**: Smooth, native-feeling `fade` transitions between bottom tabs and fluid `slide_from_bottom` animations for the detailed forecast modal.
-- **List/Grid Items**: Staggered, cascading entrance animations (`FadeInRight.delay`) for popular city chips and autocomplete search results.
-- **UI Components**:
-  - The hero temperature number bounces into place using physics-based `withSpring` animations.
-  - Weather icons feature subtle pulsing/breathing loops.
-  - Detailed weather stats and badges gracefully fade and slide down into view sequentially (`FadeInDown`).
+## Key Features
 
-## Architecture and Libraries
+- **Dynamic Cross-Platform Logic**: Shared data fetching, state management, and business logic across all three environments.
+- **Current Weather Display**: Real-time temperature, humidity, wind speed, and high/low ranges with dynamic iconography.
+- **Location & Search**: GPS-based weather fetching + worldwide manual city search with autocomplete.
+- **Interactive Forecasts**: 5-day comprehensive outlook and horizontal hourly tracking.
+- **Offline Resilience**: Integrated SQLite caching via TanStack Query to ensure data persists even without an internet connection.
+- **Rich Animations**: Powered by react-native-reanimated, featuring staggered entrances, pulsing icons, and spring-based UI transitions.
 
-This app is built with modern, scalable mobile architecture principles:
+## Technology Stack
 
-- **Framework**: React Native & [Expo](https://expo.dev/)
-- **Routing**: `expo-router` for file-based native navigation (Tabs & Stack).
-- **Data Fetching & State**: `@tanstack/react-query` to manage server state, caching, and background refetching.
-- **Offline Persistence**: Custom SQLite persister using `expo-sqlite` wired directly into `@tanstack/react-query-persist-client` to survive app restarts.
-- **Animations**: `react-native-reanimated` for 60FPS UI thread animations.
-- **Styling**: `StyleSheet` with dynamic `expo-linear-gradient` backgrounds that adapt to current weather conditions.
-- **Device APIs**: `expo-location` and `@react-native-community/netinfo` for hardware context.
+- **Core Framework**: React Native / Expo
+- **Routing**: expo-router (File-based navigation)
+- **Data Fetching**: @tanstack/react-query
+- **Database**: expo-sqlite (for offline persistence)
+- **Desktop Wrapper**: Electron + electron-builder
+- **Web Bundler**: Vite
+- **Animations**: Reanimated 3
 
 ## Getting Started
 
-1. **Clone the repository**
-2. **Install dependencies**: 
-   ```bash
-   npm install
-   ```
-3. **Configure Environment**: 
-   Create a `.env` file in the root of the project and add your OpenWeatherMap API key:
-   ```env
-   EXPO_PUBLIC_OWM_API_KEY=your_api_key_here
-   ```
-4. **Start the app**:
-   ```bash
-   npx expo start
-   ```
+### 1. Installation
+```bash
+npm install
+```
+
+### 2. Environment Setup
+Create a .env file in the root and add your OpenWeatherMap API key:
+```env
+EXPO_PUBLIC_OWM_API_KEY=your_api_key_here
+```
+
+### 3. Running the App
+- **Web**: npm run web
+- **Desktop (Dev)**: npm run electron:start
+- **Desktop (Build)**: npm run electron:dist
+- **Mobile**: npx expo start
+
+---
+*Built for a seamless weather experience on any device.*
