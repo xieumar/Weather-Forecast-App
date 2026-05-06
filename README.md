@@ -8,8 +8,8 @@ A premium, highly animated weather forecasting application built with a unified 
 
 | Platform | Deployment Link |
 | :--- | :--- |
-| Web (Vercel) | [View Live Web App]([https://weather-forecast-app14.vercel.app/]) |
-| Desktop (Windows) | [Download .exe from Google Drive]([https://drive.google.com/file/d/1XWHRlIAoMopfrkcnsL8k8vKpHa995vkg/view?usp=sharing]) |
+| Web (Vercel) | <a href="https://weather-forecast-app14.vercel.app/">View Live Web App</a> |
+| Desktop (Windows) | <a href="https://drive.google.com/file/d/1XWHRlIAoMopfrkcnsL8k8vKpHa995vkg/view?usp=sharing">Download .exe from Google Drive</a> |
 | Mobile | *Build available via Expo/EAS* |
 
 ---
