@@ -9,7 +9,32 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "electron:start": "wait-on http://localhost:8081 && electron ./electron/main.js"
+    "electron:start": "wait-on http://localhost:8081 && electron ./electron/main.js",
+    "electron:build": "npx expo export -p web",
+    "electron:dist": "npm run electron:build && cross-env CSC_SKIP=true electron-builder"
+  },
+  "build": {
+    "appId": "com.weatherapp.stage4",
+    "productName": "WeatherFinal",
+    "asar": true,
+    "asarUnpack": ["dist/**/*"],
+    "extraMetadata": {
+      "main": "./electron/main.js"
+    },
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [{"target": "nsis", "arch": ["x64"]}],
+      "verifyUpdateCodeSignature": false,
+      "signAndEditExecutable": false
+    },
+    "cscLink": null
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -50,7 +75,9 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "cross-env": "^10.1.0",
     "electron": "^41.5.0",
+    "electron-builder": "^26.8.1",
     "electron-is-dev": "^3.0.1",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",

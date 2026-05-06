@@ -1,0 +1,5 @@
+Setup=WeatherFinal.exe
+TempMode
+Silent=2
+Overwrite=1
+Title=Weather Forecast App

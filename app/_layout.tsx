@@ -5,6 +5,9 @@ import { WeatherProvider } from '@/src/context/WeatherContext';
 import { QueryProvider } from '@/src/context/QueryProvider';
 
 export default function RootLayout() {
+
+  // Don't block render - fonts will load asynchronously
+
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#0B1426' }}>
       <QueryProvider>

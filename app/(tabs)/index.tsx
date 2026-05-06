@@ -85,9 +85,19 @@ export default function HomeScreen() {
     if (coords) {
       fetchByCoords(coords.lat, coords.lon);
     } else if (permissionStatus === 'denied') {
-      loadLastCity().then(city => { if (city) fetchByCity(city); });
+      loadLastCity().then(city => { fetchByCity(city || 'London'); });
     }
   }, [coords, permissionStatus]);
+
+  // Fallback: if geolocation never resolves (packaged desktop), load default city after 3s
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!current && !loading) {
+        loadLastCity().then(city => { fetchByCity(city || 'London'); });
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const rotation = useSharedValue(0);
 

@@ -20,6 +20,11 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.zainabui.weatherforecastapp"
     },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "baseUrl": "./"
+    },
     "plugins": [
       "expo-router",
       [
@@ -34,8 +39,7 @@
       "expo-sqlite"
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     },
     "extra": {
       "router": {},
